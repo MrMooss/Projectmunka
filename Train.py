@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from keras.layers import *
+from keras.models import load_model
 
 lr_path = 'Data/lr_images'
 hr_path = 'Data/hr_images'
@@ -38,20 +39,19 @@ lr_train, lr_test, hr_train, hr_test = train_test_split(lr_images, hr_images, te
 
 hr_shape = (hr_train.shape[1], hr_train.shape[2], hr_train.shape[3])
 lr_shape = (lr_train.shape[1], lr_train.shape[2], lr_train.shape[3])
-
 hr_in = Input(shape=hr_shape)
 lr_in = Input(shape=lr_shape)
 
-gen = gan.create_gen(lr_in, 16)
+gen = load_model('gen_e_25.h5', compile=False)
 dis = gan.discriminator(hr_in)
 dis.compile(loss="binary_crossentropy", optimizer="adam", metrics=['accuracy'])
 
 vgg = gan.build_vgg((128,128,3))
 vgg.trainable = False
 
-gan_model = gan.gan(gen, dis, vgg, lr_in, hr_in)
+gan_model1 = gan.createGan(gen, dis, vgg, lr_in, hr_in)
 
-gan_model.compile(loss=["binary_crossentropy", "mse"], loss_weights=[1e-3, 1], optimizer="adam")
+gan_model1.compile(loss=["binary_crossentropy", "mse"], loss_weights=[1e-3, 1], optimizer="adam")
 
 batch_size = 1
 train_lr_batches = []
@@ -86,7 +86,7 @@ for e in range(epochs):
 
       image_features = vgg.predict(hr_imgs)
 
-      g_loss, _, _ = gan_model.train_on_batch([lr_imgs, hr_imgs], [real_label, image_features])
+      g_loss, = gan_model1.train_on_batch([lr_imgs, hr_imgs], [real_label, image_features])
 
       d_losses.append(d_loss)
       g_losses.append(g_loss)
@@ -96,4 +96,5 @@ for e in range(epochs):
 
     print("epoch:", e + 1, "g_loss:", g_loss, "d_loss:", d_loss)
     if (e + 1) % 5 == 0:
-      gen.save("gen_e_" + str(e + 1) + ".h5")
+      gen.save("gene" + str(e + 1) + ".h5")
+      dis.save("dise" + str(e + 1) + ".h5")

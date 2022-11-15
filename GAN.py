@@ -1,8 +1,9 @@
-from keras.models import sequential
+from keras.models import Sequential
 from keras import Model
 from keras.layers import *
 from keras.applications.vgg19 import VGG19
 
+counter = 0
 
 def res_block(input):
     res = Conv2D(64, (3, 3), padding="same")(input)
@@ -40,15 +41,15 @@ def create_gen(gen_ip, num_res_block):
 
     op = Conv2D(3, (9,9), padding="same")(layers)
 
-    return Model(inputs=gen_ip, outputs=op)
+    return Model(inputs=gen_ip, outputs=op, name=str(++counter))
 
 
 def dic_block(input, filter, strides=1, bn=True):
-    disc = Conv2D(filter, (3, 3), strides=strides, padding="same")(input)
+    layer = Conv2D(filter, (3, 3), strides=strides, padding="same")(input)
     if bn:
-        disc = BatchNormalization(momentum=0.8)(disc)
-    disc = LeakyReLU(alpha=0.2)(disc)
-    return disc
+        layer = BatchNormalization(momentum=0.8)(layer)
+    layer = LeakyReLU(alpha=0.2)(layer)
+    return layer
 
 
 def discriminator(disc_input):
@@ -67,19 +68,19 @@ def discriminator(disc_input):
     d10 = LeakyReLU(alpha=0.2)(d9)
     validity = Dense(1, activation='sigmoid')(d10)
 
-    return Model(disc_input, validity)
+    return Model(disc_input, validity, name='1')
 
 
 def build_vgg(hr_shape):
     vgg = VGG19(weights="imagenet", include_top=False, input_shape=hr_shape)
 
-    return Model(inputs=vgg.inputs, outputs=vgg.layers[15].output)
+    return Model(inputs=vgg.inputs, outputs=vgg.layers[15].output, name=str(++counter))
 
 
-def gan(gen, disc, vgg, lr_input, hr_input):
+def createGan(gen, disc, vgg, lr_input, hr_input):
     generator_image = gen(lr_input)
     generator_features = vgg(generator_image)
     disc.trainable = False
-    validity = disc(generator_image)
+    val = disc(generator_image)
 
-    return Model(inputs=[lr_input, hr_input], outputs=[validity, generator_features])
+    return Model(inputs=[lr_input, hr_input], outputs=[val, generator_features], name=str(++counter))
