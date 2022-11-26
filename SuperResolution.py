@@ -11,9 +11,8 @@ generator = load_model('gen_e_20.h5', compile=False)
 def generateHr(path):
     img = convertImage(path)
     highres = generator.predict(img)
-    highres = cv2.cvtColor(highres[0, :, :, :], cv2.COLOR_BGR2RGB)
     #TODO szineket meg kell csinálni
-    return highres
+    return highres[0, :, :, :]
 
 
 def convertImage(path):

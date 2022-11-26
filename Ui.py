@@ -47,6 +47,7 @@ class QImageViewer(QMainWindow):
             self.imageLabel.setPixmap(QPixmap.fromImage(image))
             self.scaleFactor = 1.0
             self.srAct.setEnabled(True)
+            self.bicubicAct.setEnabled(True)
             self.scrollArea.setVisible(True)
             self.fitToWindowAct.setEnabled(True)
             self.updateActions()
@@ -71,11 +72,14 @@ class QImageViewer(QMainWindow):
             img = sr.generateHr(self.path)
             p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
             self.imageLabel.setPixmap(QPixmap.fromImage(p))
-            self.scaleFactor = 1.0
             self.normalSize()
 
             if not self.fitToWindowAct.isChecked():
                 self.imageLabel.adjustSize()
+
+    def bicubic(self):
+        print("cs dos")
+            # TODO
 
     def createActions(self):
         self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
@@ -84,11 +88,12 @@ class QImageViewer(QMainWindow):
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
+        self.bicubicAct = QAction("&Bicub", self, enabled=False, triggered=self.bicubic)
+
 
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
-        self.fileMenu.addAction(self.srAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
@@ -97,8 +102,14 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
 
+        self.picsMenu = QMenu("&Edit", self)
+        self.picsMenu.addAction(self.srAct)
+        self.picsMenu.addAction(self.bicubicAct)
+
+
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.picsMenu)
 
     def updateActions(self):
         self.normalSizeAct.setEnabled(not self.fitToWindowAct.isChecked())
