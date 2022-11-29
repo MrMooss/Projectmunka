@@ -3,37 +3,40 @@ import glob
 import sys
 import os
 
-img = Image.open('tree.jpg')
-h, w = img.size
-a, b = h, w
-while a % 32 != 0:
-    a = a + 1
-while b % 32 != 0:
-    b = b + 1
-img2 = img.crop((0, 0, a, b))
-h, w = img.size
-x, y = 0, 0
-for i in range(0, h, 32):
-    for j in range(0, w, 32):
-        c = img.crop((j, i, j + 32, i + 32))
-        c.save('temp/' + str(x) + '-' + str(y) + '.jpg')
-        y += 1
-    x += 1
+# img = Image.open('test.jpg')
+# h, w = img.size
+# a, b = h, w
+# while a % 32 != 0:
+#     a = a + 1
+# while b % 32 != 0:
+#     b = b + 1
+# img2 = img.crop((0, 0, a, b))
+# img2.save('test_extended.jpg')
+# w, h = img2.size
+# x, y = 0, 0
+# for i in range(0, h, 32):
+#     y = 0
+#     for j in range(0, w, 32):
+#         c = img2.crop((j, i, j + 32, i + 32))
+#         c.save('temp/' + str(x) + '-' + str(y) + '.jpg')
+#         y += 1
+#     x += 1
+#
+# images = [Image.open(x) for x in glob.glob('temp/*.jpg')]
+# new_im = Image.new('RGB', (w, h))
+#
+# x_offset = 0
+# y_offset = 0
+# for im in images:
+#     print(im.filename)
+#     new_im.paste(im, (x_offset, y_offset))
+#     x_offset += 32
+#     print(x_offset, y_offset)
+#     if x_offset == w:
+#         x_offset = 0
+#         y_offset += 32
+# new_im.save('test_merged.jpg')
 
-images = [Image.open(x) for x in glob.glob('temp/*.jpg')]
-widths, heights = zip(*(i.size for i in images))
-
-total_width = sum(widths)
-max_height = sum(heights)
-
-new_im = Image.new('RGB', (total_width, max_height))
-
-x_offset = 0
-for im in images:
-    new_im.paste(im, (x_offset, 0))
-    x_offset += im.size[0]
-# TODO 2D-re megcsinálni
-new_im.save('test.jpg')
 
 # expands the image so it can be split into 32x32 subimages
 def expand_image(path):
@@ -49,10 +52,12 @@ def expand_image(path):
     return img2
 
 
+# crops image to 32x32 subimages and saves them to the temp folder
 def crop(img):
-    h, w = img.size
+    w, h = img.size
     x, y = 0, 0
     for i in range(0, h, 32):
+        y = 0
         for j in range(0, w, 32):
             c = img.crop((j, i, j + 32, i + 32))
             c.save('temp/' + str(x) + '-' + str(y) + '.jpg')
@@ -60,18 +65,19 @@ def crop(img):
         x += 1
 
 
-def merge_images(path):
-    images = [Image.open(x) for x in 'temp/*.jpg']
-    widths, heights = zip(*(i.size for i in images))
-
-    total_width = sum(widths)
-    max_height = max(heights)
-
-    new_im = Image.new('RGB', (total_width, max_height))
+# merges 128x128 images from a folder into one
+def merge_images(path, w, h):
+    images = [Image.open(x) for x in glob.glob(path + '/*.jpg')]
+    new_im = Image.new('RGB', (w * 3, h * 3))
 
     x_offset = 0
+    y_offset = 0
     for im in images:
-        new_im.paste(im, (x_offset, 0))
-        x_offset += im.size[0]
-
-    new_im.save('test.jpg')
+        print(im.filename)
+        new_im.paste(im, (x_offset, y_offset))
+        x_offset += 128
+        print(x_offset, y_offset)
+        if x_offset == w:
+            x_offset = 0
+            y_offset += 128
+    return new_im
