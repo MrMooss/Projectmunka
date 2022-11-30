@@ -39,8 +39,7 @@ import os
 
 
 # expands the image so it can be split into 32x32 subimages
-def expand_image(path):
-    img = Image.open(path)
+def expand_image(img):
     h, w = img.size
     a, b = h, w
     while a % 32 != 0:
