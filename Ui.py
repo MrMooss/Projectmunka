@@ -70,6 +70,7 @@ class QImageViewer(QMainWindow):
     def superRes(self):
         if self.path != '':
             img = sr.generateHr(self.path)
+            print("before convert", type(img))
             p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
             self.imageLabel.setPixmap(QPixmap.fromImage(p))
             self.normalSize()

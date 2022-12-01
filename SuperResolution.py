@@ -5,9 +5,9 @@ import os
 import cv2
 import numpy as np
 from keras.models import load_model
-import matplotlib.pyplot as plt
+import matplotlib.image as plt
 import ImageSplitAndMerge as ism
-from PIL import Image
+from PIL import Image, ImageQt
 import tempfile
 
 generator = load_model('gen_e_20.h5', compile=False)
@@ -24,16 +24,18 @@ def generateHr(path):
             images = glob.glob('temp/*.jpg')
             for im in images:
                 img2 = convertImage(im)
+                print("before predict")
                 hr = generator.predict(img2)
-                img3 = Image.fromarray(hr)
-                img3.save('temp/' + os.path.basename(im))
+                print("after predict")
+                plt.imsave('temp/' + os.path.basename(im), hr[0, :, :, :])
+                print("after save")
             imagehigh = ism.merge_images('temp', w, h)
-            return imagehigh
-            # TODO convertálás PyQtra Pillow imageből
+            print("before return")
+            return ImageQt.ImageQt(imagehigh)
         else:
             img = convertImage(path)
             highres = generator.predict(img)
-            return highres[0, :, :, :]
+            return highres[0, :, :, ::-1]
 
 
 def convertImage(path):
