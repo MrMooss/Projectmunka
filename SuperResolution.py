@@ -11,7 +11,10 @@ generator = load_model('gen_e_20.h5', compile=False)
 def generateHr(path):
     img = convertImage(path)
     highres = generator.predict(img)
-    #TODO szineket meg kell csinálni
+
+    # cv2.imwrite("test.jpg", highres[0])
+    cv2.imshow('test', highres[0, :, :, ::-1])
+
     return highres[0, :, :, :]
 
 
