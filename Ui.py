@@ -5,10 +5,7 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
     qApp, QFileDialog
 import SuperResolution as sr
 import cv2
-import BicubicInterpolation as bi
-import LinearInterpolation as li
-import NearestNeighbourInterpolation as ni
-
+from PIL import ImageQt
 
 class QImageViewer(QMainWindow):
 
@@ -17,7 +14,6 @@ class QImageViewer(QMainWindow):
 
         self.path = ''
 
-        self.image = None
         self.imageLabel = QLabel()
         self.imageLabel.setBackgroundRole(QPalette.Light)
         self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
@@ -52,8 +48,6 @@ class QImageViewer(QMainWindow):
             self.scaleFactor = 1.0
             self.srAct.setEnabled(True)
             self.bicubicAct.setEnabled(True)
-            self.linearAct.setEnabled(True)
-            self.nearestAct.setEnabled(True)
             self.scrollArea.setVisible(True)
             self.fitToWindowAct.setEnabled(True)
             self.updateActions()
@@ -76,44 +70,16 @@ class QImageViewer(QMainWindow):
     def superRes(self):
         if self.path != '':
             img = sr.generateHr(self.path)
-            self.image = img
-            p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
-            self.imageLabel.setPixmap(QPixmap.fromImage(p))
+            img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_BGR888)
+            self.imageLabel.setPixmap(QPixmap.fromImage(img))
             self.normalSize()
 
             if not self.fitToWindowAct.isChecked():
                 self.imageLabel.adjustSize()
 
     def bicubic(self):
-        if self.path != '':
-            img = bi.bicubic_interpolation(self.path)
-            self.image = img
-            # p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
-            # self.imageLabel.setPixmap(QPixmap.fromImage(p))
-            self.imageLabel.setPixmap(QPixmap('bicubic.jpg'))
-            self.normalSize()
-
-    def linear(self):
-        if self.path != '':
-            img = li.linear_interpolation(self.path)
-            self.image = img
-            # p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
-            # self.imageLabel.setPixmap(QPixmap.fromImage(p))
-            self.imageLabel.setPixmap(QPixmap('linear.jpg'))
-            self.normalSize()
-
-    def nearest(self):
-        if self.path != '':
-            img = ni.nearest_interpolation(self.path)
-            self.image = img
-            # p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
-            # self.imageLabel.setPixmap(QPixmap.fromImage(p))
-            self.imageLabel.setPixmap(QPixmap('nearest.jpg'))
-            self.normalSize()
-
-    def savePic(self):
-        filename = QFileDialog.getSaveFileName(filter="JPG(.jpg);;PNG(.png);;TIFF(.tiff);;BMP(.bmp)")[0]
-        cv2.imwrite(filename, self.image)
+        print("cs dos")
+            # TODO
 
     def createActions(self):
         self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
@@ -123,9 +89,6 @@ class QImageViewer(QMainWindow):
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
         self.bicubicAct = QAction("&Bicub", self, enabled=False, triggered=self.bicubic)
-        self.linearAct = QAction("&Linear", self, enabled=False, triggered=self.linear)
-        self.nearestAct = QAction("&Nearest", self, enabled=False, triggered=self.nearest)
-
 
 
     def createMenus(self):
@@ -142,8 +105,6 @@ class QImageViewer(QMainWindow):
         self.picsMenu = QMenu("&Edit", self)
         self.picsMenu.addAction(self.srAct)
         self.picsMenu.addAction(self.bicubicAct)
-        self.picsMenu.addAction(self.linearAct)
-        self.picsMenu.addAction(self.nearestAct)
 
 
         self.menuBar().addMenu(self.fileMenu)
