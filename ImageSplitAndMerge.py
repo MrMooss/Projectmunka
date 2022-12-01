@@ -70,7 +70,6 @@ def crop(path, img):
 # merges 128x128 images from a folder into one
 def merge_images(path, w, h):
     imagelist = sorted(glob.glob(path + '/*.jpg'))
-    print(imagelist)
     images = [Image.open(x) for x in imagelist]
     new_im = Image.new('RGB', (w*128, h*128))
 
