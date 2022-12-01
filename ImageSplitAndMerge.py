@@ -52,31 +52,34 @@ def expand_image(img):
 
 
 # crops image to 32x32 subimages and saves them to the temp folder
-def crop(img):
+def crop(path, img):
     w, h = img.size
     x, y = 0, 0
+    n = 111111111111111
     for i in range(0, h, 32):
         y = 0
         for j in range(0, w, 32):
             c = img.crop((j, i, j + 32, i + 32))
-            c.save('temp/' + str(x) + '-' + str(y) + '.jpg')
+            c.save(path + '/' + str(n) + '.jpg')
+            n += 1
             y += 1
         x += 1
+    return x, y
 
 
 # merges 128x128 images from a folder into one
 def merge_images(path, w, h):
-    images = [Image.open(x) for x in glob.glob(path + '/*.jpg')]
-    new_im = Image.new('RGB', (w * 3, h * 3))
+    imagelist = sorted(glob.glob(path + '/*.jpg'))
+    print(imagelist)
+    images = [Image.open(x) for x in imagelist]
+    new_im = Image.new('RGB', (w*128, h*128))
 
     x_offset = 0
     y_offset = 0
     for im in images:
-        print(im.filename)
         new_im.paste(im, (x_offset, y_offset))
         x_offset += 128
-        print(x_offset, y_offset)
-        if x_offset == w:
+        if x_offset == w * 128:
             x_offset = 0
             y_offset += 128
     return new_im

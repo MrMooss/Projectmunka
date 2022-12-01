@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
     qApp, QFileDialog
 import SuperResolution as sr
 import cv2
-
+from PIL import ImageQt
 
 class QImageViewer(QMainWindow):
 
@@ -70,9 +70,8 @@ class QImageViewer(QMainWindow):
     def superRes(self):
         if self.path != '':
             img = sr.generateHr(self.path)
-            print("before convert", type(img))
-            p = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_RGB888)
-            self.imageLabel.setPixmap(QPixmap.fromImage(p))
+            img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QtGui.QImage.Format_BGR888)
+            self.imageLabel.setPixmap(QPixmap.fromImage(img))
             self.normalSize()
 
             if not self.fitToWindowAct.isChecked():

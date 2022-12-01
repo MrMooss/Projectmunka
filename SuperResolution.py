@@ -5,10 +5,12 @@ import os
 import cv2
 import numpy as np
 from keras.models import load_model
-import matplotlib.image as plt
+import matplotlib.image as pltim
+import matplotlib.pyplot as plt
 import ImageSplitAndMerge as ism
 from PIL import Image, ImageQt
 import tempfile
+import shutil
 
 generator = load_model('gen_e_20.h5', compile=False)
 
@@ -19,19 +21,18 @@ def generateHr(path):
         h, w = img.size
         if h != 32 or w != 32:
             img = ism.expand_image(img)
-            w, h = img.size
-            ism.crop(img)
-            images = glob.glob('temp/*.jpg')
+            x, y = ism.crop(temp, img)
+            images = glob.glob(temp + '/*.jpg')
             for im in images:
                 img2 = convertImage(im)
-                print("before predict")
                 hr = generator.predict(img2)
-                print("after predict")
-                plt.imsave('temp/' + os.path.basename(im), hr[0, :, :, :])
-                print("after save")
-            imagehigh = ism.merge_images('temp', w, h)
-            print("before return")
-            return ImageQt.ImageQt(imagehigh)
+                hr = cv2.convertScaleAbs(hr, alpha=(255.0))
+                cv2.imwrite(temp + '/' + os.path.basename(im), hr[0, :, :, ::-1])
+            imagehigh = ism.merge_images(temp, y, x)
+            imagehigh = imagehigh.crop((0, 0, h*4, w*4))
+            imagehigh.save(temp + '/highimg.jpg')
+            imagehigh = cv2.imread(temp + '/highimg.jpg')
+            return imagehigh
         else:
             img = convertImage(path)
             highres = generator.predict(img)
